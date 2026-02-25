@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { gsap } from "gsap";
+import Lenis from "lenis";
 
 const navLinks = [
   { label: "Home", href: "#" },
@@ -17,36 +17,71 @@ export default function Navbar() {
   const btnRef = useRef<HTMLButtonElement>(null);
   const fillRef = useRef<HTMLSpanElement>(null);
   const labelRef = useRef<HTMLSpanElement>(null);
+  const [scrolled, setScrolled] = useState(false);
 
+  /* ── Glass effect on scroll (nav pill only) ── */
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* ── Smooth scroll handler using Lenis ── */
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    if (href === "#") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const targetId = href.replace("#", "");
+    const target = document.getElementById(targetId);
+
+    if (target) {
+      e.preventDefault();
+      // Find the Lenis instance attached to the window (set by SmoothScrollProvider)
+      // and fall back to native smooth scroll if not available.
+      const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
+      if (lenis) {
+        lenis.scrollTo(target, { offset: -80, duration: 1.4 });
+      } else {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
+  /* ── GSAP button hover ── */
   const handleMouseEnter = () => {
-    // White fill wipes in from left → right
     gsap.fromTo(
       fillRef.current,
       { scaleX: 0, transformOrigin: "left center" },
       { scaleX: 1, transformOrigin: "left center", duration: 0.38, ease: "power2.out" }
     );
-    // Border turns gray-500 on hover
     gsap.to(btnRef.current, { borderColor: "#6b7280", duration: 0.2 });
-    // Text turns black
     gsap.to(labelRef.current, { color: "#000000", duration: 0.2, ease: "none" });
   };
 
   const handleMouseLeave = () => {
-    // White fill wipes out from right → left
     gsap.to(fillRef.current, {
       scaleX: 0,
       transformOrigin: "right center",
       duration: 0.35,
       ease: "power2.in",
     });
-    // Border back to gray-900 on leave
     gsap.to(btnRef.current, { borderColor: "#111827", duration: 0.25 });
-    // Text back to yellow
-    gsap.to(labelRef.current, { color: "#FFFB00", duration: 0.2, ease: "none", delay: 0.1 });
+    gsap.to(labelRef.current, {
+      color: "#FFFB00",
+      duration: 0.2,
+      ease: "none",
+      delay: 0.1,
+    });
   };
 
   return (
-    <header className="w-full flex justify-between items-center px-8 py-5 mt-5">
+    <header className="fixed top-1 left-0 right-0 z-50 w-full flex justify-between items-center px-8 py-5">
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="bg-[#F2FF00] w-12 h-12 flex items-center justify-center font-bold text-[28px] rounded-[10px]">
@@ -56,22 +91,17 @@ export default function Navbar() {
       </div>
 
       {/* Nav Links */}
-      <nav className="
-        hidden md:flex
-        gap-10
-        px-8 py-5
-        rounded-2xl
-        border border-white/20
-        bg-gray-50
-        backdrop-blur-xl
-        backdrop-saturate-200
-        shadow-lg
-        text-gray-700 fixed ml-100
-      ">
+      <nav
+        className={`hidden md:flex gap-15 px-8 py-5 rounded-2xl text-gray-700 transition-all duration-500 border ${scrolled
+          ? "bg-white/60 backdrop-blur-xl backdrop-saturate-200 shadow-lg border-white/30"
+          : "bg-transparent backdrop-blur-none border-transparent shadow-none"
+          }`}
+      >
         {navLinks.map(({ label, href }) => (
-          <Link
+          <a
             key={label}
             href={href}
+            onClick={(e) => handleNavClick(e, href)}
             className="
               relative
               font-medium
@@ -89,10 +119,11 @@ export default function Navbar() {
               after:transition-all
               after:duration-300
               hover:after:w-full
+              cursor-pointer
             "
           >
             {label}
-          </Link>
+          </a>
         ))}
       </nav>
 
