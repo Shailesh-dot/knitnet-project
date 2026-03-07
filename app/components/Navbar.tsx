@@ -1,150 +1,59 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { gsap } from "gsap";
-import Lenis from "lenis";
-
-const navLinks = [
-  { label: "Home", href: "#" },
-  { label: "About", href: "#about" },
-  { label: "What We Solve", href: "#solve" },
-  { label: "Our Goal", href: "#goal" },
-  { label: "Testimonial", href: "#testimonial" },
-  { label: "Contact", href: "#contact" },
-];
+import Link from "next/link";
 
 export default function Navbar() {
-  const btnRef = useRef<HTMLButtonElement>(null);
-  const fillRef = useRef<HTMLSpanElement>(null);
-  const labelRef = useRef<HTMLSpanElement>(null);
-  const [scrolled, setScrolled] = useState(false);
+  const navItems = [
+    { name: "Home", href: "#home" },
+    { name: "About", href: "#about" },
+    { name: "What We Solve", href: "#solve" },
+    { name: "Our Goal", href: "#goal" },
+    { name: "Testimonial", href: "#testimonial" },
+    { name: "Contact", href: "#contact" },
+  ];
 
-  /* ── Glass effect on scroll (nav pill only) ── */
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  /* ── Smooth scroll handler using Lenis ── */
-  const handleNavClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    href: string
-  ) => {
-    if (href === "#") {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const lenis = (window as any).__lenis;
+    if (lenis) {
+      lenis.scrollTo(href, {
+        duration: 1.5,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      });
     }
-
-    const targetId = href.replace("#", "");
-    const target = document.getElementById(targetId);
-
-    if (target) {
-      e.preventDefault();
-      // Find the Lenis instance attached to the window (set by SmoothScrollProvider)
-      // and fall back to native smooth scroll if not available.
-      const lenis = (window as unknown as { __lenis?: Lenis }).__lenis;
-      if (lenis) {
-        lenis.scrollTo(target, { offset: -80, duration: 1.4 });
-      } else {
-        target.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  };
-
-  /* ── GSAP button hover ── */
-  const handleMouseEnter = () => {
-    gsap.fromTo(
-      fillRef.current,
-      { scaleX: 0, transformOrigin: "left center" },
-      { scaleX: 1, transformOrigin: "left center", duration: 0.38, ease: "power2.out" }
-    );
-    gsap.to(btnRef.current, { borderColor: "#6b7280", duration: 0.2 });
-    gsap.to(labelRef.current, { color: "#000000", duration: 0.2, ease: "none" });
-  };
-
-  const handleMouseLeave = () => {
-    gsap.to(fillRef.current, {
-      scaleX: 0,
-      transformOrigin: "right center",
-      duration: 0.35,
-      ease: "power2.in",
-    });
-    gsap.to(btnRef.current, { borderColor: "#111827", duration: 0.25 });
-    gsap.to(labelRef.current, {
-      color: "#FFFB00",
-      duration: 0.2,
-      ease: "none",
-      delay: 0.1,
-    });
   };
 
   return (
-    <header className="fixed top-1 left-0 right-0 z-50 w-full flex justify-between items-center px-8 py-5">
-      {/* Logo */}
-      <div className="flex items-center gap-3">
-        <div className="bg-[#F2FF00] w-12 h-12 flex items-center justify-center font-bold text-[28px] rounded-[10px]">
-          K
+    <header className="fixed top-0 left-0 w-full z-50 pointer-events-none">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-8 py-8">
+        {/* Logo Island */}
+        <div className="flex items-center gap-3 pointer-events-auto">
+          <div className="bg-[#ffff00] w-13 h-13 flex items-center justify-center font-bold text-[30px] rounded-[10px]">
+            K
+          </div>
+          <span className="text-xl font-semibold">Knitnet</span>
         </div>
-        <span className="text-xl font-bold">Knitnet</span>
+
+        {/* Nav Links Pill */}
+        <nav className="hidden md:flex gap-8 bg-white/40 backdrop-blur-lg px-10 py-5 rounded-[20px] border border-white/30 shadow-xl pointer-events-auto">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={(e) => handleScroll(e, item.href)}
+              className="relative text-gray-600 hover:text-black font-medium transition-colors after:content-[''] after:absolute after:-bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-[2px] after:w-0 after:bg-black after:transition-all after:duration-300 hover:after:w-full"
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Login Button Island */}
+        <button className="group relative overflow-hidden bg-black text-[#ffff00] px-7 py-2 rounded-[10px] font-bold cursor-pointer transition-all duration-300 shadow-md hover:shadow-yellow-400/20 pointer-events-auto">
+          <span className="relative z-10">Login</span>
+          <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+        </button>
       </div>
-
-      {/* Nav Links */}
-      <nav
-        className={`hidden md:flex gap-15 px-8 py-5 rounded-2xl text-gray-700 transition-all duration-500 border ${scrolled
-          ? "bg-white/60 backdrop-blur-xl backdrop-saturate-200 shadow-lg border-white/30"
-          : "bg-transparent backdrop-blur-none border-transparent shadow-none"
-          }`}
-      >
-        {navLinks.map(({ label, href }) => (
-          <a
-            key={label}
-            href={href}
-            onClick={(e) => handleNavClick(e, href)}
-            className="
-              relative
-              font-medium
-              text-gray-700
-              transition-colors duration-300
-              hover:text-black
-              after:content-['']
-              after:absolute
-              after:left-0
-              after:-bottom-0.5
-              after:h-0.5
-              after:w-0
-              after:bg-yellow-800
-              after:rounded-full
-              after:transition-all
-              after:duration-300
-              hover:after:w-full
-              cursor-pointer
-            "
-          >
-            {label}
-          </a>
-        ))}
-      </nav>
-
-      {/* Login Button — Left-to-Right Fill Wipe */}
-      <button
-        ref={btnRef}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        className="relative overflow-hidden bg-black px-6 py-2 rounded-xl font-semibold cursor-pointer border border-gray-900"
-      >
-        {/* White fill layer — starts scaled to 0 on X axis */}
-        <span
-          ref={fillRef}
-          className="absolute inset-0 bg-white rounded-xl"
-          style={{ transform: "scaleX(0)", transformOrigin: "left center" }}
-        />
-        {/* Button label — sits above the fill */}
-        <span ref={labelRef} className="relative z-10 text-[#FFFB00] font-semibold">
-          Login
-        </span>
-      </button>
     </header>
   );
 }
