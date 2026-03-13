@@ -24,32 +24,32 @@ export default function Navbar() {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 pointer-events-none">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-8 py-8">
-        {/* Logo Island */}
-        <div className="flex items-center gap-3 pointer-events-auto">
-          <div className="bg-[#ffff00] w-13 h-13 flex items-center justify-center font-bold text-[30px] rounded-[10px]">
+    <header className="fixed top-0 left-0 w-full z-50 pointer-events-none mt-8 px-8">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4 bg-white/50 backdrop-blur-[6px] rounded-[20px] shadow-sm pointer-events-auto border border-white/20">
+        {/* Logo Section */}
+        <div className="flex items-center gap-3">
+          <div className="bg-[#ffff00] w-12 h-12 flex items-center justify-center font-bold text-[28px] rounded-[10px]">
             K
           </div>
-          <span className="text-xl font-semibold">Knitnet</span>
+          <span className="text-xl font-bold text-black tracking-tight">Knitnet</span>
         </div>
 
-        {/* Nav Links Pill */}
-        <nav className="hidden md:flex gap-8 bg-white/40 backdrop-blur-lg px-10 py-5 rounded-[20px] border border-white/30 shadow-xl pointer-events-auto">
+        {/* Nav Links */}
+        <nav className="hidden lg:flex items-center gap-12">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={(e) => handleScroll(e, item.href)}
-              className="relative text-gray-600 hover:text-black font-medium transition-colors after:content-[''] after:absolute after:-bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-[2px] after:w-0 after:bg-black after:transition-all after:duration-300 hover:after:w-full"
+              className="relative text-gray-500 hover:text-black font-bold text-[14px] transition-colors after:content-[''] after:absolute after:-bottom-0 after:left-1/2 after:-translate-x-1/2 after:h-[2px] after:w-0 after:bg-black after:transition-all after:duration-300 hover:after:w-full"
             >
               {item.name}
             </Link>
           ))}
         </nav>
 
-        {/* Login Button Island */}
-        <button className="group relative overflow-hidden bg-black text-[#ffff00] px-7 py-2 rounded-[10px] font-bold cursor-pointer transition-all duration-300 shadow-md hover:shadow-yellow-400/20 pointer-events-auto">
+        {/* Login Button */}
+        <button className="group relative overflow-hidden bg-black text-[#ffff00] px-8 py-2.5 rounded-[12px] text-sm font-bold cursor-pointer transition-all duration-300 shadow-md hover:shadow-yellow-400/20">
           <span className="relative z-10">Login</span>
           <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
         </button>
